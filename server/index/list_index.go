@@ -8,3 +8,7 @@ package index
 type ListIndex struct{
 
 }
+
+func CreateListIndex()(*ListIndex){
+	return &ListIndex{}
+}

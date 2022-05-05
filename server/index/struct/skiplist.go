@@ -10,12 +10,13 @@ import (
 /**
  * @Author: Ember
  * @Date: 2022/4/30 16:07
- * @Description: 跳表，为什么要使用调表呢？
+ * @Description: 跳表，为什么要使用跳表呢？
  **/
 
 const(
 	//最高层级
 	default_maxLevel int = 18
+	//随机数，决定结点的level的
 	default_probability float64 = 1/math.E
 )
 type (
@@ -46,6 +47,7 @@ type (
 		randSource rand.Source
 	}
 )
+
 
 //key & value的get方法
 func (e *Node) Key() []byte{
@@ -94,6 +96,7 @@ func CreateSkipList() *SkipList{
 }
 
 //初始化每一层的概率
+//计算方式就是阶乘的方式，每上升一层的概率是1/e
 func initialLevelProbability(probability float64,maxLevel int)([]float64){
 	levelTable := make([]float64,maxLevel)
 	for i := 0;i < maxLevel;i++{
@@ -104,7 +107,7 @@ func initialLevelProbability(probability float64,maxLevel int)([]float64){
 	return levelTable
 }
 
-//生成随机概率
+//计算结点的level
 func (s *SkipList) RandomLevel() int{
 	//获取概率
 	r := float64(s.randSource.Int63()) / (1 << 63)
@@ -121,14 +124,15 @@ func (s *SkipList) Front() *Node{
 
 //往跳表中添加结点
 //并且返回新添加的结点
-func (s *SkipList) Put(key []byte,value interface{}) *Node{
+func (s *SkipList) Put(key []byte,value interface{})(node *Node) {
 	//第一步：找到前面的一个pre结点
 	preNode := s.GetPreNode(key)
 	//第二步：判断前结点下一个的key值，如果相等，只需要替换value即可
 	nextNode := preNode.level.next[0]
 	if nextNode != nil && bytes.Compare(nextNode.key,key) == 0{
 		nextNode.value = value
-		return nextNode
+		node = nextNode
+		return
 	}
 	//第三步：创建Node，并且决定高度
 	//要地址，因为数组中存的也是地址
@@ -145,7 +149,8 @@ func (s *SkipList) Put(key []byte,value interface{}) *Node{
 		curNode.level.next[i] = preNode.level.next[i]
 		preNode.level.next[i] = curNode
 	}
-	return curNode
+	node = curNode
+	return
 }
 
 //搜索结点

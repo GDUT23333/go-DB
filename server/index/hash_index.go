@@ -8,3 +8,8 @@ package index
 type HashIndex struct{
 
 }
+func CreateHashIndex()(*HashIndex){
+	return &HashIndex{
+
+	}
+}

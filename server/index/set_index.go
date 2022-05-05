@@ -8,3 +8,6 @@ package index
 type SetIndex struct{
 
 }
+func CreateSetIndex()(*SetIndex){
+	return &SetIndex{}
+}
